@@ -13,7 +13,9 @@ from aw_core.log import setup_logging
 
 from .manager import Manager
 from .config import AwQtSettings
-
+from .eventQueue import event_queue
+from .evnets import EventDetail, EventTypes
+from .store import state_management
 logger = logging.getLogger(__name__)
 
 
@@ -76,6 +78,17 @@ def main(
 
     manager = Manager(testing=testing)
     manager.autostart(_autostart_modules)
+    
+    def observe_changes(event:EventDetail):
+        if(event.type == EventTypes.START_ACTIVITY):
+            print("STARTING")
+            manager.start("aw-watcher-afk")
+            manager.start("aw-watcher-window")
+        elif(event.type == EventTypes.STOP_ACTIVITY):
+            print("STOPPING")
+            manager.stop_all()
+        
+    event_queue.subscribe(on_next=observe_changes)
 
     if not no_gui and not interactive_cli:
         from . import trayicon  # pylint: disable=import-outside-toplevel

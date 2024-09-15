@@ -10,6 +10,9 @@ from typing import Optional, List, Hashable, Set, Iterable
 
 import aw_core
 
+from .eventQueue import event_queue
+
+
 logger = logging.getLogger(__name__)
 
 # The path of aw_qt
@@ -120,7 +123,7 @@ def _discover_modules_system() -> List["Module"]:
     _log_modules(modules)
     return modules
 
-
+from .store import state_management
 class Module:
     def __init__(self, name: str, path: Path, type: str) -> None:
         self.name = name
@@ -150,6 +153,10 @@ class Module:
         exec_cmd = [str(self.path)]
         if testing:
             exec_cmd.append("--testing")
+        exec_cmd.append('--token')
+        exec_cmd.append(state_management.token)
+        exec_cmd.append('--teamId')
+        exec_cmd.append(str(state_management.team_id))
         # logger.debug("Running: {}".format(exec_cmd))
 
         # Don't display a console window on Windows

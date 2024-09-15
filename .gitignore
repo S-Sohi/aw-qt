@@ -6,3 +6,6 @@ dist
 build
 .mypy_cache
 *.pyc
+/env
+/aw-watcher-afk
+*.db

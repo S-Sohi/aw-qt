@@ -6,7 +6,6 @@ import sys
 import webbrowser
 from pathlib import Path
 from typing import Any, Dict, Optional
-
 import aw_core
 from PyQt6 import QtCore
 from PyQt6.QtGui import QIcon
@@ -20,8 +19,11 @@ from PyQt6.QtWidgets import (
 )
 
 from .manager import Manager, Module
+from .mainWindow import MainWindow
 
 logger = logging.getLogger(__name__)
+app = QApplication(sys.argv)
+widget = QWidget()
 
 
 def get_env() -> Dict[str, str]:
@@ -42,33 +44,15 @@ def get_env() -> Dict[str, str]:
     return env
 
 
-def open_url(url: str) -> None:
-    if sys.platform == "linux":
-        env = get_env()
-        subprocess.Popen(["xdg-open", url], env=env)
-    else:
-        webbrowser.open(url)
 
-
-def open_webui(root_url: str) -> None:
     print("Opening dashboard")
     open_url(root_url)
+    
+def open_main_window(root_url: str) -> None:
+    main_window = MainWindow(root_url)
+    main_window.show()
+    main_window.exec()
 
-
-def open_apibrowser(root_url: str) -> None:
-    print("Opening api browser")
-    open_url(root_url + "/api")
-
-
-def open_dir(d: str) -> None:
-    """From: http://stackoverflow.com/a/1795849/965332"""
-    if sys.platform == "win32":
-        os.startfile(d)
-    elif sys.platform == "darwin":
-        subprocess.Popen(["open", d])
-    else:
-        env = get_env()
-        subprocess.Popen(["xdg-open", d], env=env)
 
 
 class TrayIcon(QSystemTrayIcon):
@@ -82,7 +66,6 @@ class TrayIcon(QSystemTrayIcon):
         QSystemTrayIcon.__init__(self, icon, parent)
         self._parent = parent  # QSystemTrayIcon also tries to save parent info but it screws up the type info
         self.setToolTip("ActivityWatch" + (" (testing)" if testing else ""))
-
         self.manager = manager
         self.testing = testing
 
@@ -93,7 +76,7 @@ class TrayIcon(QSystemTrayIcon):
 
     def on_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
         if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
-            open_webui(self.root_url)
+            open_main_window(self.root_url)
 
     def _build_rootmenu(self) -> None:
         menu = QMenu(self._parent)
@@ -103,22 +86,22 @@ class TrayIcon(QSystemTrayIcon):
             menu.addSeparator()
 
         # openWebUIIcon = QIcon.fromTheme("open")
-        menu.addAction("Open Dashboard", lambda: open_webui(self.root_url))
-        menu.addAction("Open API Browser", lambda: open_apibrowser(self.root_url))
+        menu.addAction("Open Dashboard", lambda: open_main_window(self.root_url))
+        # menu.addAction("Open API Browser", lambda: open_apibrowser(self.root_url))
 
         menu.addSeparator()
 
-        modulesMenu = menu.addMenu("Modules")
-        self._build_modulemenu(modulesMenu)
+        # modulesMenu = menu.addMenu("Modules")
+        # self._build_modulemenu(modulesMenu)
 
-        menu.addSeparator()
-        menu.addAction(
-            "Open log folder", lambda: open_dir(aw_core.dirs.get_log_dir(None))
-        )
-        menu.addAction(
-            "Open config folder", lambda: open_dir(aw_core.dirs.get_config_dir(None))
-        )
-        menu.addSeparator()
+        # menu.addSeparator()
+        # menu.addAction(
+        #     "Open log folder", lambda: open_dir(aw_core.dirs.get_log_dir(None))
+        # )
+        # menu.addAction(
+        #     "Open config folder", lambda: open_dir(aw_core.dirs.get_config_dir(None))
+        # )
+        # menu.addSeparator()
 
         exitIcon = QIcon.fromTheme(
             "application-exit", QIcon("media/application_exit.png")
@@ -127,9 +110,9 @@ class TrayIcon(QSystemTrayIcon):
         # Seems to be in agreement with: https://github.com/OtterBrowser/otter-browser/issues/1313
         #   "it seems that the bug is also triggered when creating a QIcon with an invalid path"
         if exitIcon.availableSizes():
-            menu.addAction(exitIcon, "Quit ActivityWatch", lambda: exit(self.manager))
+            menu.addAction(exitIcon, "Quit", lambda: exit(self.manager))
         else:
-            menu.addAction("Quit ActivityWatch", lambda: exit(self.manager))
+            menu.addAction("Quit", lambda: exit(self.manager))
 
         self.setContextMenu(menu)
 
@@ -155,9 +138,9 @@ class TrayIcon(QSystemTrayIcon):
                     # print(module.text(), alive)
 
             # TODO: Do it in a better way, singleShot isn't pretty...
-            QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
+            # QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
 
-        QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
+        # QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
 
         def check_module_status() -> None:
             unexpected_exits = self.manager.get_unexpected_stops()
@@ -167,7 +150,7 @@ class TrayIcon(QSystemTrayIcon):
                     module.stop()
 
             # TODO: Do it in a better way, singleShot isn't pretty...
-            QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
+            # QtCore.QTimer.singleShot(2000, rebuild_modules_menu)
 
         QtCore.QTimer.singleShot(2000, check_module_status)
 
@@ -208,7 +191,6 @@ def run(manager: Manager, testing: bool = False) -> Any:
     logger.info("Creating trayicon...")
     # print(QIcon.themeSearchPaths())
 
-    app = QApplication(sys.argv)
 
     # This is needed for the icons to get picked up with PyInstaller
     scriptdir = Path(__file__).parent
@@ -237,9 +219,6 @@ def run(manager: Manager, testing: bool = False) -> Any:
     timer = QtCore.QTimer()
     timer.start(100)  # You may change this if you wish.
     timer.timeout.connect(lambda: None)  # Let the interpreter run each 500 ms.
-
-    # root widget
-    widget = QWidget()
 
     if not QSystemTrayIcon.isSystemTrayAvailable():
         QMessageBox.critical(

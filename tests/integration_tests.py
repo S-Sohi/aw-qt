@@ -16,7 +16,8 @@ import sys
 # TODO: Write a context manager for the server process
 @contextmanager
 def running_process(call: List[str]):
-    proc = subprocess.Popen(call, stdout=PIPE, stderr=PIPE)
+    print(call)
+    proc = subprocess.Popen(call, stdout=PIPE, stderr=PIPE, shell=True)
     yield proc
     proc.kill()
 
