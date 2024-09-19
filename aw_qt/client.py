@@ -32,9 +32,7 @@ class client():
     
     def get_team_configuration(self, team_id:int):
         headers = {'Authorization': self.token}
-        return ['chrome','firefox']
-        # response = requests.get(self.url+'/api/user/login', headers=headers)
-        # if(response.status_code == 200):
-        #     return response.json()
-        # else:
-        #     return []
+        # return ['chrome','firefox']
+        response = requests.get(self.url+f'/api/teams/configuration/{team_id}', headers=headers)
+        if(response.status_code == 200):
+            return response.json()

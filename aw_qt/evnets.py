@@ -7,6 +7,7 @@ class EventTypes(Enum):
     START_ACTIVITY = 4
     STOP_ACTIVITY = 5
     LOGOUT = 6
+    RESET_ACTIVITY = 7
 
 
 class EventDetail():

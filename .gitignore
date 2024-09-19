@@ -7,5 +7,5 @@ build
 .mypy_cache
 *.pyc
 /env
-/aw-watcher-afk
+/aw-watcher-*
 *.db

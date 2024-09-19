@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QStackedWidget
 )
+from pathlib import Path
 import sys
 from .client import client
 from .datastore import DataStore
@@ -32,7 +33,10 @@ class MainWindow(QDialog):
         layout.addWidget(self.stacked_widget)
         self.setLayout(layout)
         
-        self.setWindowTitle("Time Tracking Application")
+        self.setWindowTitle("Second Master")
+        # scriptdir = Path(__file__).parent
+        # QtCore.QDir.addSearchPath("icons", str(scriptdir.parent / "media/logo/"))
+        # self.setWindowIcon(QIcon('logo.png'))
         self.setGeometry(100, 100, 300, 150)
         
         self.event_queue.subscribe(on_next=self.observe_changes)

@@ -21,9 +21,9 @@ def observe(event: EventDetail):
     if(event.type == EventTypes.SUCCESSFUL_LOGIN):
         state_management.update_token(event.data)
         state_management.update_login_state(True)
-        print(event.data)
     elif(event.type == EventTypes.START_ACTIVITY):
         state_management.update_team_id(event.data)
-        print(event.data)
+    elif(event.type == EventTypes.RESET_ACTIVITY):
+        state_management.update_team_id(event.data)
 event_queue.subscribe(on_next=observe)
     

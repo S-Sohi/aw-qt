@@ -24,7 +24,6 @@ class LoginPage(QDialog):
         self.client = client(url)
         self.datastore = DataStore()
         self.event_queue = event_queue
-        self.setWindowTitle("Time Tracking")
         self.setGeometry(100, 100, 300, 150)
         
         # Create layout
@@ -63,7 +62,7 @@ class LoginPage(QDialog):
             self.datastore.saveToken(response.json())
             self.event_queue.on_next(EventDetail(EventTypes.SUCCESSFUL_LOGIN, response.json()))
         else:
-            self.event_queue.on_next(EventDetail(EventTypes.SUCCESSFUL_LOGIN, None))
+            self.event_queue.on_next(EventDetail(EventTypes.FAILED_LOGIN, None))
         
             
    

@@ -87,6 +87,10 @@ def main(
         elif(event.type == EventTypes.STOP_ACTIVITY):
             print("STOPPING")
             manager.stop_all()
+        elif(event.type == EventTypes.RESET_ACTIVITY):
+            manager.stop_all()
+            manager.start("aw-watcher-afk")
+            manager.start("aw-watcher-window")
         
     event_queue.subscribe(on_next=observe_changes)
 

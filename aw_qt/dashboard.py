@@ -45,11 +45,13 @@ class DashboardPage(QDialog):
         # configuration_label = QLabel("Configurations")
         apps_label = QLabel("Apps: ")
         self.apps_layout = QHBoxLayout()
-        
+        privacy_lable = QLabel('Note: Only the above apps are being tracked for privacy purposes.')
+        privacy_lable.setStyleSheet('font-size: 10px; color: gray;')
         
         # self.layout.addWidget(configuration_label)
         self.layout.addWidget(apps_label)
         self.layout.addLayout(self.apps_layout)
+        self.layout.addWidget(privacy_lable)
         
         self.button = QPushButton("Start")
         # self.signout_button = QPushButton("Logout")
@@ -85,10 +87,13 @@ class DashboardPage(QDialog):
         self.clear_apps_layout()
         selected_team = self.selector.currentData()
         self.team_id = selected_team.id
+        if(self.activity_state == ActivityState.STARTED):
+            self.event_queue.on_next(EventDetail(EventTypes.RESET_ACTIVITY, self.team_id))
         configs = self.client.get_team_configuration(self.team_id)
         for app in configs:
             self.apps_layout.addWidget(ChipButton(app), alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
         self.apps_layout.addStretch()
+            
                 
     def clear_apps_layout(self):
         while self.apps_layout.count():
