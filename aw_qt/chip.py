@@ -4,20 +4,15 @@ from PyQt6.QtWidgets import (
 )
 import random
 
-def random_hex_color():
-    # Generate a random integer between 0 and 0xFFFFFF (16777215)
-    random_color = random.randint(0, 0xFFFFFF)
-    # Convert the integer to a hex string and format it to ensure 6 characters
-    hex_color = f'#{random_color:06x}'
-    return hex_color
 class ChipButton(QPushButton):
     def __init__(self, text, parent=None):
         super().__init__(text, parent)
-        background_color = random_hex_color()
+        background_color = "#0069d9"
         self.setStyleSheet("""
             QPushButton {
                 background-color: #e0e0e0;
                 border: none;
+                color: #f1f1f1;
                 border-radius: 10px; /* Rounded edges */
                 padding: 4px 6px; /* Padding around text */
                 font-size: 12px;

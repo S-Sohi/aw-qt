@@ -16,13 +16,14 @@ from .login import LoginPage
 from .dashboard import DashboardPage
 from .evnets import EventTypes,EventDetail
 from .eventQueue import event_queue
-
+from .store import state_management
 class MainWindow(QDialog):
     def __init__(self, url):
         super().__init__()
         self.datastore = DataStore()
         self.stacked_widget = QStackedWidget(self)
         self.event_queue = event_queue
+        self.state_management = state_management
         self.login_page = LoginPage(url)
         self.dashboard_page = DashboardPage(url)
 
@@ -34,12 +35,19 @@ class MainWindow(QDialog):
         self.setLayout(layout)
         
         self.setWindowTitle("Second Master")
-        # scriptdir = Path(__file__).parent
-        # QtCore.QDir.addSearchPath("icons", str(scriptdir.parent / "media/logo/"))
-        # self.setWindowIcon(QIcon('logo.png'))
-        self.setGeometry(100, 100, 300, 150)
+        scriptdir = Path(__file__).parent
+        QtCore.QDir.addSearchPath("icons", str(scriptdir.parent / "media/logo/"))
+        self.setWindowIcon(QIcon('icons:logo.ico'))
+        self.setGeometry(100, 100, 300, 400)
         
+        self.show_first_page()
         self.event_queue.subscribe(on_next=self.observe_changes)
+        
+    def show_first_page(self):
+        if self.state_management.is_logged_in:
+            self.show_dashboard()
+        else:
+            self.show_login()
 
     def observe_changes(self, event:EventDetail):
         if(event.type == EventTypes.SUCCESSFUL_LOGIN):
@@ -47,12 +55,12 @@ class MainWindow(QDialog):
         elif(event == EventTypes.TOKEN_EXPIRED):
             pass
         elif(event == EventTypes.LOGOUT):
-            self.logout()
+            self.show_login()
         
     def show_dashboard(self):
         self.stacked_widget.setCurrentWidget(self.dashboard_page)
         
-    def logout(self):
+    def show_login(self):
         self.stacked_widget.setCurrentWidget(self.login_page)
             
    

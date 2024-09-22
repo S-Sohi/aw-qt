@@ -27,7 +27,7 @@ class LoginPage(QDialog):
         self.setGeometry(100, 100, 300, 150)
         
         # Create layout
-        self.layout = QVBoxLayout()
+        self.form_layout = QVBoxLayout()
         
         # Email Label and Input
         self.email_label = QLabel("Email:")
@@ -45,14 +45,16 @@ class LoginPage(QDialog):
         self.login_button.clicked.connect(self.check_credentials)
 
         # Add Widgets to Layout
-        self.layout.addWidget(self.email_label)
-        self.layout.addWidget(self.email_input)
-        self.layout.addWidget(self.password_label)
-        self.layout.addWidget(self.password_input)
-        self.layout.addWidget(self.login_button)
+        self.form_layout.addWidget(self.email_label)
+        self.form_layout.addWidget(self.email_input)
+        self.form_layout.addSpacing(10)
+        self.form_layout.addWidget(self.password_label)
+        self.form_layout.addWidget(self.password_input)
+        self.form_layout.addStretch()
+        self.form_layout.addWidget(self.login_button)
 
         # Set the layout for the window
-        self.setLayout(self.layout)
+        self.setLayout(self.form_layout)
 
     def check_credentials(self):
         email = self.email_input.text()

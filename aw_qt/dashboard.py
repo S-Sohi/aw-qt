@@ -15,6 +15,7 @@ from .datastore import DataStore
 from .evnets import EventDetail, EventTypes
 from enum import Enum
 from .eventQueue import event_queue
+from .store import state_management
 
 class ActivityState(Enum):
     STARTED = 1
@@ -49,18 +50,20 @@ class DashboardPage(QDialog):
         privacy_lable.setStyleSheet('font-size: 10px; color: gray;')
         
         # self.layout.addWidget(configuration_label)
+        self.layout.addSpacing(10)
         self.layout.addWidget(apps_label)
         self.layout.addLayout(self.apps_layout)
         self.layout.addWidget(privacy_lable)
+        self.layout.addStretch()
         
         self.button = QPushButton("Start")
-        # self.signout_button = QPushButton("Logout")
+        self.button.setDisabled(True)
+        self.signout_button = QPushButton("Logout")
         self.button.clicked.connect(self.change_activity_state)
-        # self.signout_button.clicked.connect(self.logout)
+        self.signout_button.clicked.connect(self.logout)
         self.layout.addWidget(self.button)
         # self.layout.addWidget(self.signout_button)
         
-        # Set the layout for the main window
         self.setLayout(self.layout)
         self.setGeometry(100, 100, 300, 300)
 
@@ -75,6 +78,7 @@ class DashboardPage(QDialog):
             self.event_queue.on_next(EventDetail(EventTypes.STOP_ACTIVITY, None))
     
     def logout(self):
+        self.event_queue.on_next(EventDetail(EventTypes.STOP_ACTIVITY, None))
         self.event_queue.on_next(EventDetail(EventTypes.LOGOUT, None))
         
     def getTeams(self):
@@ -86,6 +90,11 @@ class DashboardPage(QDialog):
     def load_configuration(self):
         self.clear_apps_layout()
         selected_team = self.selector.currentData()
+        if(selected_team is None or selected_team.id is None):
+            self.button.setDisabled(True)
+            return
+        else:
+            self.button.setDisabled(False)
         self.team_id = selected_team.id
         if(self.activity_state == ActivityState.STARTED):
             self.event_queue.on_next(EventDetail(EventTypes.RESET_ACTIVITY, self.team_id))
@@ -106,6 +115,13 @@ class DashboardPage(QDialog):
     def showEvent(self, a0: QShowEvent) -> None:
         super().showEvent(a0)
         self.getTeams()
+        self.setStates()
+        
+    def setStates(self):
+        if(state_management.is_started):
+            self.button.setText("Stop")
+            self.activity_state = ActivityState.STARTED
+        
             
             
         
