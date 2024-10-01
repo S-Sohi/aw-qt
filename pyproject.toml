@@ -25,6 +25,7 @@ importlib-metadata = {version = "*", python = "<3.10"}
 
 # provides pkg_resources, needed for pyinstaller for some reason
 setuptools = "*"
+rx = "^3.2.0"
 
 [tool.poetry.group.pyqt.dependencies]
 # keep these in sync
