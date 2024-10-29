@@ -2,13 +2,16 @@ from typing import List, Any
 
 from aw_core.config import load_config_toml
 
-
 default_config = """
 [aw-qt]
 autostart_modules = []
+url = 'http://localhost'
+port = 5600
 
 [aw-qt-testing]
 autostart_modules = []
+url = 'http://localhost'
+port = 5666
 """.strip()
 
 
@@ -22,3 +25,5 @@ class AwQtSettings:
         config_section: Any = config["aw-qt" if not testing else "aw-qt-testing"]
 
         self.autostart_modules: List[str] = config_section["autostart_modules"]
+        self.url: str = config_section["url"]
+        self.port: str = config_section["port"]

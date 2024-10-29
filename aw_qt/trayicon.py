@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 
 from .manager import Manager, Module
 from .mainWindow import MainWindow
+from .config import AwQtSettings
 
 logger = logging.getLogger(__name__)
 app = QApplication(sys.argv)
@@ -68,8 +69,12 @@ class TrayIcon(QSystemTrayIcon):
         self.setToolTip("ActivityWatch" + (" (testing)" if testing else ""))
         self.manager = manager
         self.testing = testing
-
-        self.root_url = f"http://localhost:{5666 if self.testing else 5600}"
+        config = AwQtSettings(testing=testing)
+        if config.url:
+          self.root_url = f"{config.url}:{config.port}"        
+        else:
+          self.root_url = f"http://localhost:{5666 if self.testing else 5600}"        
+            
         self.activated.connect(self.on_activated)
 
         self._build_rootmenu()
