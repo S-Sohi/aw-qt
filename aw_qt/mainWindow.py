@@ -20,15 +20,14 @@ from .store import state_management
 class MainWindow(QDialog):
     def __init__(self, url):
         super().__init__()
+        self.url = url
         self.datastore = DataStore()
         self.stacked_widget = QStackedWidget(self)
         self.event_queue = event_queue
         self.state_management = state_management
         self.login_page = LoginPage(url)
-        self.dashboard_page = DashboardPage(url)
 
         self.stacked_widget.addWidget(self.login_page)
-        self.stacked_widget.addWidget(self.dashboard_page)
 
         layout = QVBoxLayout()
         layout.addWidget(self.stacked_widget)
@@ -54,10 +53,12 @@ class MainWindow(QDialog):
             self.show_dashboard()
         elif(event == EventTypes.TOKEN_EXPIRED):
             pass
-        elif(event == EventTypes.LOGOUT):
+        elif(event.type == EventTypes.LOGOUT):
             self.show_login()
         
     def show_dashboard(self):
+        self.dashboard_page = DashboardPage(self.url)
+        self.stacked_widget.addWidget(self.dashboard_page)
         self.stacked_widget.setCurrentWidget(self.dashboard_page)
         
     def show_login(self):

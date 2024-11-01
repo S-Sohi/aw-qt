@@ -16,6 +16,9 @@ from .evnets import EventDetail, EventTypes
 from enum import Enum
 from .eventQueue import event_queue
 from .store import state_management
+import asyncio
+from rx.subject import Subject
+from .notification import NotificationManager
 
 class ActivityState(Enum):
     STARTED = 1
@@ -62,16 +65,20 @@ class DashboardPage(QDialog):
         self.button.clicked.connect(self.change_activity_state)
         self.signout_button.clicked.connect(self.logout)
         self.layout.addWidget(self.button)
-        # self.layout.addWidget(self.signout_button)
+        self.layout.addWidget(self.signout_button)
         
         self.setLayout(self.layout)
         self.setGeometry(100, 100, 300, 300)
+        
+        self.config_update_subject = Subject()
+        self.notification_manager = NotificationManager()
 
     def change_activity_state(self):
         if(self.activity_state == ActivityState.STOPPED):
             self.button.setText("Stop")
             self.activity_state = ActivityState.STARTED
             self.event_queue.on_next(EventDetail(EventTypes.START_ACTIVITY, self.team_id))
+            asyncio.run(self.get_configuration_with_interval())
         elif(self.activity_state == ActivityState.STARTED):
             self.button.setText("Start")
             self.activity_state = ActivityState.STOPPED
@@ -99,10 +106,35 @@ class DashboardPage(QDialog):
         if(self.activity_state == ActivityState.STARTED):
             self.event_queue.on_next(EventDetail(EventTypes.RESET_ACTIVITY, self.team_id))
         configs = self.client.get_team_configuration(self.team_id)
-        for app in configs:
-            self.apps_layout.addWidget(ChipButton(app), alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.set_configuation(configs)
         self.apps_layout.addStretch()
+        
+    def set_configuation(self, config):
+        self.config = config
+        for app in self.config:
+            self.apps_layout.addWidget(ChipButton(app), alignment=QtCore.Qt.AlignmentFlag.AlignLeft)
+        
+    async def get_configuration_with_interval(self):
+        while True:
+            configs = self.client.get_team_configuration(self.team_id)
+            is_equal = self.compare_configurations(self.config, configs)
+            if(not is_equal):
+                self.set_configuation(configs)
+                self.notification_manager.show("salam")
+            await asyncio.sleep(30)
             
+       
+    def compare_configurations(self, config1, config2) -> bool:
+        config1_len = len(config1)
+        config2_len = len(config2) 
+        if (config2_len != config1_len):
+            return False
+        
+        for i in range(config1_len):
+            if(config1[i] != config2[i]):
+                return False
+        return True
+        
                 
     def clear_apps_layout(self):
         while self.apps_layout.count():

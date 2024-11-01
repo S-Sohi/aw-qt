@@ -78,9 +78,9 @@ class TrayIcon(QSystemTrayIcon):
         self.activated.connect(self.on_activated)
 
         self._build_rootmenu()
-
+        
     def on_activated(self, reason: QSystemTrayIcon.ActivationReason) -> None:
-        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
             open_main_window(self.root_url)
 
     def _build_rootmenu(self) -> None:
